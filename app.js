@@ -1,8 +1,10 @@
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
+const config = require('./bin/config');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const mongoose = require('mongoose');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -18,6 +20,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Init mongoose
+mongoose.Promise = Promise;
+mongoose.connect(config.mongodb.url);
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, x-Requested-With, Content-Type, Accept, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE');
+    return res.status(200).json({});
+  }
+
+  next();
+});
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
