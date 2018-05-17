@@ -60,6 +60,12 @@ exports.user_registration = (req, res, next) => {
                     message: 'Email exists'
                 });
             } else {
+                if (req.body.password !== req.body.repeatPassword) {
+                    return res.status(500).json({
+                        message: 'Passwords must match'
+                    });
+                }
+
                 bcrypt.hash(req.body.password, 10, (err, hash) => {
                     if (err) {
                         return res.status(500).json({
