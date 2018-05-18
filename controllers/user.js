@@ -16,6 +16,7 @@ exports.user_login = (req, res, next) => {
             bcrypt.compare(req.body.password, data.password, (err, data) =>  {
                 if (err) {
                     return res.status(401).json({
+                        data: null,
                         message: 'Auth failed'
                     });
                 }
@@ -33,11 +34,13 @@ exports.user_login = (req, res, next) => {
                     );
 
                     return res.status(200).json({
+                        data: null,
                         message: 'Auth success',
                         token: token
                     })
                 }
                 res.status(401).json({
+                    data: null,
                     message: 'Auth failed'
                 });
             });
@@ -48,6 +51,18 @@ exports.user_login = (req, res, next) => {
                 error: err
             });
         });
+};
+
+exports.user_login_facebook = (req, res, next) => {
+    res.status(200).json({
+        message: 'Login with facebook works!'
+    });
+};
+
+exports.user_login_google = (req, res, next) => {
+    res.status(200).json({
+        message: 'Login with google works!'
+    });
 };
 
 exports.user_registration = (req, res, next) => {
@@ -62,6 +77,7 @@ exports.user_registration = (req, res, next) => {
             } else {
                 if (req.body.password !== req.body.repeatPassword) {
                     return res.status(500).json({
+                        data: null,
                         message: 'Passwords must match'
                     });
                 }
