@@ -7,13 +7,18 @@ const logger = require('morgan');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const session = require('express-session');
+const cors = require('cors');
+const nev = require('email-verification')(mongoose);
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const dashboardRouter = require('./routes/dashboard');
 
+const User = require('./models/user');
+
 const app = express();
 
+app.use(cors());
 app.use(session({
     secret: 's3cr3t',
     resave: true,

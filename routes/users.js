@@ -7,7 +7,6 @@ const passportGoogle = require('../controllers/auth-google');
 
 router.post('/login', UserController.user_login);
 router.post('/login/facebook', passportFacebook.authenticate('facebook'));
-// router.post('/login/facebook', UserController.user_login_facebook);
 router.get('/login/facebook/callback',
     passportFacebook.authenticate('facebook', { failureRedirect: '/login' }),
     function(req, res) {
