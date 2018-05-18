@@ -5,12 +5,22 @@ const config = require('./bin/config');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
+const passport = require('passport');
+const session = require('express-session');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const dashboardRouter = require('./routes/dashboard');
 
 const app = express();
+
+app.use(session({
+    secret: 's3cr3t',
+    resave: true,
+    saveUninitialized: true
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -28,10 +38,10 @@ mongoose.connect(config.mongodb.url);
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, x-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Origin, x-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token');
 
   if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, HEAD, PATCH, PUT, DELETE');
     return res.status(200).json({});
   }
 
