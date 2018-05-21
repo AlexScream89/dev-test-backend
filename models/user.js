@@ -17,6 +17,13 @@ const userSchema = mongoose.Schema({
     },
     lastName: {
         type: String
+    },
+    active: {
+        type: Number,
+        default: 0
+    },
+    activationHash: {
+        type: String
     }
 });
 

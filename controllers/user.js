@@ -6,6 +6,19 @@ const nodemailer = require('nodemailer');
 
 const User = require('../models/user');
 
+const mailConfig = {
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+        user: process.env.email,
+        pass: process.env.emailPassword
+    },
+    tls: {
+        rejectUnauthorized: false
+    }
+};
+
 exports.user_login = (req, res, next) => {
     User.findOne({email: req.body.email})
         .exec()
@@ -16,6 +29,8 @@ exports.user_login = (req, res, next) => {
                     message: 'Auth failed'
                 });
             }
+
+            const accountActive = data.active;
             bcrypt.compare(req.body.password, data.password, (err, data) =>  {
                 if (err) {
                     return res.status(401).json({
@@ -23,8 +38,15 @@ exports.user_login = (req, res, next) => {
                         message: 'Auth failed'
                     });
                 }
+
+                if (!accountActive) {
+                    return res.status(401).json({
+                        data: null,
+                        message: 'Your account not activated'
+                    })
+                }
+
                 if (data) {
-                    console.log('token', process.env.JWT_KEY);
                     const token = jwt.sign(
                         {
                             email: data.email,
@@ -91,17 +113,40 @@ exports.user_registration = (req, res, next) => {
                             error: err
                         });
                     } else {
+                        const activationHash = generatePassword(30, false);
                         const user = new User({
                             _id: new mongoose.Types.ObjectId(),
                             email: req.body.email,
                             password: hash,
                             firstName: req.body.firstName,
-                            lastName: req.body.lastName
+                            lastName: req.body.lastName,
+                            activationHash: activationHash
                         });
 
                         user.save()
                             .then(data => {
-                                res.status(200).json(data);
+                                const activationLink = `http://localhost:3000/users/activate-account/${activationHash}`;
+
+                                nodemailer.createTestAccount((err, account) => {
+                                    let transporter = nodemailer.createTransport(mailConfig);
+
+                                    let mailOptions = {
+                                        from: '"Dev Test" <dev-test@admin.com>',
+                                        to: req.body.email,
+                                        subject: 'Account activation',
+                                        html: `For account activation you need click this link - <a href='${activationLink}'>${activationLink}</a>`
+                                    };
+
+                                    transporter.sendMail(mailOptions, (error, info) => {
+                                        if (error) {
+                                            return console.log(error);
+                                        }
+                                    })
+                                });
+
+                                res.status(200).json({
+                                    message: 'Please check your email for account activation'
+                                });
                             })
                             .catch(err => {
                                 res.status(500).json({
@@ -131,18 +176,7 @@ exports.user_forgot_password = (req, res, next) => {
 
             //Send email
             nodemailer.createTestAccount((err, account) => {
-                let transporter = nodemailer.createTransport({
-                    host: 'smtp.gmail.com',
-                    port: 587,
-                    secure: false,
-                    auth: {
-                        user: process.env.email,
-                        pass: process.env.emailPassword
-                    },
-                    tls: {
-                        rejectUnauthorized: false
-                    }
-                });
+                let transporter = nodemailer.createTransport(mailConfig);
 
                 let mailOptions = {
                     from: '"Dev Test" <dev-test@admin.com>',
@@ -155,8 +189,6 @@ exports.user_forgot_password = (req, res, next) => {
                     if (error) {
                         return console.log(error);
                     }
-                    console.log('Message sent: %s', info.messageId);
-                    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 
                     //Save new password to DB
                     bcrypt.hash(newPassword, 10, (err, hash) => {
@@ -191,5 +223,30 @@ exports.user_forgot_password = (req, res, next) => {
                 data: null,
                 error: err
             });
+        });
+};
+
+exports.user_activation_account = (req, res, next) => {
+    const activationHash = req.params.activationHash;
+
+    User.findOne({activationHash: activationHash})
+        .exec()
+        .then(data => {
+            const updateObj = {
+                active: 1,
+                activationHash: null
+            };
+
+            User.update({_id: data._id}, {$set: updateObj})
+                .exec()
+                .then(data => {
+                    res.render('layout', { body: 'Your account activation' });
+                })
+                .catch(err => {
+                    res.render('error', { message: 'Invalid activation link' });
+                });
+        })
+        .catch(err => {
+            res.render('error', { message: 'Invalid activation link' });
         });
 };
