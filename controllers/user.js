@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const generatePassword = require('password-generator');
+const nodemailer = require('nodemailer');
+
 const User = require('../models/user');
 
 exports.user_login = (req, res, next) => {
@@ -123,9 +126,64 @@ exports.user_forgot_password = (req, res, next) => {
                 });
             }
 
-            res.status(200).json({
-                data: null,
-                message: 'Please check you email'
+            //Generate new password
+            const newPassword = generatePassword(10, false);
+
+            //Send email
+            nodemailer.createTestAccount((err, account) => {
+                let transporter = nodemailer.createTransport({
+                    host: 'smtp.gmail.com',
+                    port: 587,
+                    secure: false,
+                    auth: {
+                        user: process.env.email,
+                        pass: process.env.emailPassword
+                    },
+                    tls: {
+                        rejectUnauthorized: false
+                    }
+                });
+
+                let mailOptions = {
+                    from: '"Dev Test" <dev-test@admin.com>',
+                    to: req.body.email,
+                    subject: 'Reset password',
+                    text: `Your new password is ${newPassword}`
+                };
+
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        return console.log(error);
+                    }
+                    console.log('Message sent: %s', info.messageId);
+                    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+
+                    //Save new password to DB
+                    bcrypt.hash(newPassword, 10, (err, hash) => {
+                        if (err) {
+                            return res.status(500).json({
+                                data: null,
+                                error: err
+                            });
+                        } else {
+                            User.update({email: req.body.email}, {$set: {password: hash}})
+                                .exec()
+                                .then(data => {
+                                    res.status(200).json({
+                                        data: null,
+                                        message: 'Please check you email'
+                                    });
+                                })
+                                .catch(err => {
+                                    res.status(500).json({
+                                        data: null,
+                                        error: err
+                                    });
+                                });
+                        }
+                    });
+
+                });
             });
         })
         .catch(err => {
