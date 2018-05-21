@@ -19,5 +19,6 @@ router.get('/login/google/callback',
         console.log('google success');
     });
 router.post('/registration', UserController.user_registration);
+router.post('/forgot-password', UserController.user_forgot_password);
 
 module.exports = router;

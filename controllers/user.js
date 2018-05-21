@@ -111,3 +111,27 @@ exports.user_registration = (req, res, next) => {
             }
         });
 };
+
+exports.user_forgot_password = (req, res, next) => {
+    User.find({email: req.body.email})
+        .exec()
+        .then(data => {
+            if (data.length < 1) {
+                return res.status(500).json({
+                    data: null,
+                    error: 'Email not found'
+                });
+            }
+
+            res.status(200).json({
+                data: null,
+                message: 'Please check you email'
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                data: null,
+                error: err
+            });
+        });
+};
