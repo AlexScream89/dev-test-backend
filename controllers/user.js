@@ -23,17 +23,16 @@ exports.user_login = (req, res, next) => {
     //Search user by email
     User.findOne({email: req.body.email})
         .exec()
-        .then(data => {
-            if (data.length < 1) {
+        .then(user => {
+            if (user.length < 1) {
                 return res.status(401).json({
                     data: null,
                     message: 'Auth failed'
                 });
             }
 
-            const accountActive = data.active;
             //Comparing passwords
-            bcrypt.compare(req.body.password, data.password, (err, data) =>  {
+            bcrypt.compare(req.body.password, user.password, (err, data) =>  {
                 if (err) {
                     return res.status(401).json({
                         data: null,
@@ -41,7 +40,7 @@ exports.user_login = (req, res, next) => {
                     });
                 }
 
-                if (!accountActive) {
+                if (!user.active) {
                     return res.status(401).json({
                         data: null,
                         message: 'Your account not activated'
@@ -52,8 +51,8 @@ exports.user_login = (req, res, next) => {
                     //Create token
                     const token = jwt.sign(
                         {
-                            email: data.email,
-                            userId: data._id
+                            email: user.email,
+                            userId: user._id
                         },
                         process.env.JWT_KEY,
                         {
@@ -61,8 +60,15 @@ exports.user_login = (req, res, next) => {
                         }
                     );
 
+                    const userData = {
+                        id: user._id,
+                        email: user.email,
+                        firstName: user.firstName,
+                        lastName: user.lastName
+                    };
+
                     return res.status(200).json({
-                        data: null,
+                        data: userData,
                         message: 'Auth success',
                         token: token
                     })
@@ -263,5 +269,22 @@ exports.user_activation_account = (req, res, next) => {
         })
         .catch(err => {
             res.render('error', { message: 'Invalid activation link' });
+        });
+};
+
+exports.get_user_by_id = (req, res, next) => {
+    User.findOne({_id: req.params.id})
+        .select('_id email firstName lastName')
+        .exec()
+        .then(user => {
+            res.status(200).json({
+                data: user
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                data: null,
+                error: err
+            });
         });
 };
