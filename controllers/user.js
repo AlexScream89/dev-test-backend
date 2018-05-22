@@ -20,6 +20,7 @@ const mailConfig = {
 };
 
 exports.user_login = (req, res, next) => {
+    //Search user by email
     User.findOne({email: req.body.email})
         .exec()
         .then(data => {
@@ -31,6 +32,7 @@ exports.user_login = (req, res, next) => {
             }
 
             const accountActive = data.active;
+            //Comparing passwords
             bcrypt.compare(req.body.password, data.password, (err, data) =>  {
                 if (err) {
                     return res.status(401).json({
@@ -47,6 +49,7 @@ exports.user_login = (req, res, next) => {
                 }
 
                 if (data) {
+                    //Create token
                     const token = jwt.sign(
                         {
                             email: data.email,
@@ -91,6 +94,7 @@ exports.user_login_google = (req, res, next) => {
 };
 
 exports.user_registration = (req, res, next) => {
+    //Search user by email
     User.find({email: req.body.email})
         .exec()
         .then(data => {
@@ -107,13 +111,17 @@ exports.user_registration = (req, res, next) => {
                     });
                 }
 
+                //Bcrypt password
                 bcrypt.hash(req.body.password, 10, (err, hash) => {
                     if (err) {
                         return res.status(500).json({
                             error: err
                         });
                     } else {
+                        //Generate activation hash
                         const activationHash = generatePassword(30, false);
+
+                        //Preparing user data for DB
                         const user = new User({
                             _id: new mongoose.Types.ObjectId(),
                             email: req.body.email,
@@ -123,10 +131,13 @@ exports.user_registration = (req, res, next) => {
                             activationHash: activationHash
                         });
 
+                        //Save user to DB
                         user.save()
                             .then(data => {
+                                //Create activation link for email
                                 const activationLink = `http://localhost:3000/users/activate-account/${activationHash}`;
 
+                                //Send activation email
                                 nodemailer.createTestAccount((err, account) => {
                                     let transporter = nodemailer.createTransport(mailConfig);
 
@@ -161,6 +172,7 @@ exports.user_registration = (req, res, next) => {
 };
 
 exports.user_forgot_password = (req, res, next) => {
+    //Search user by email
     User.find({email: req.body.email})
         .exec()
         .then(data => {
@@ -190,7 +202,7 @@ exports.user_forgot_password = (req, res, next) => {
                         return console.log(error);
                     }
 
-                    //Save new password to DB
+                    //Bcrypt new password
                     bcrypt.hash(newPassword, 10, (err, hash) => {
                         if (err) {
                             return res.status(500).json({
@@ -198,6 +210,7 @@ exports.user_forgot_password = (req, res, next) => {
                                 error: err
                             });
                         } else {
+                            //Save new password to DB
                             User.update({email: req.body.email}, {$set: {password: hash}})
                                 .exec()
                                 .then(data => {
@@ -229,6 +242,7 @@ exports.user_forgot_password = (req, res, next) => {
 exports.user_activation_account = (req, res, next) => {
     const activationHash = req.params.activationHash;
 
+    //Search user by email
     User.findOne({activationHash: activationHash})
         .exec()
         .then(data => {
@@ -237,6 +251,7 @@ exports.user_activation_account = (req, res, next) => {
                 activationHash: null
             };
 
+            //Activation user account
             User.update({_id: data._id}, {$set: updateObj})
                 .exec()
                 .then(data => {
