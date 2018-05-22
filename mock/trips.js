@@ -1,22 +1,22 @@
 const trips = [
     {
         'title': 'First Trip',
-        'trips': [
+        'places': [
             {
                 'imageUrl': 'https://media.istockphoto.com/photos/portrait-of-young-woman-in-car-looking-at-map-picture-id540529776?k=6&m=540529776&s=612x612&w=0&h=amo6VRUjjAwHCvChzcvE2eGco8z22E_8qMF35cgEMqk=',
-                'county': 'Italy',
+                'country': 'Italy',
                 'city': 'Rome',
                 'month': 'may'
             },
             {
                 'imageUrl': 'https://media.istockphoto.com/photos/portrait-of-young-woman-in-car-looking-at-map-picture-id540529776?k=6&m=540529776&s=612x612&w=0&h=amo6VRUjjAwHCvChzcvE2eGco8z22E_8qMF35cgEMqk=',
-                'county': 'Italy',
+                'country': 'Italy',
                 'city': 'Milan',
                 'month': 'june'
             },
             {
                 'imageUrl': 'https://media.istockphoto.com/photos/portrait-of-young-woman-in-car-looking-at-map-picture-id540529776?k=6&m=540529776&s=612x612&w=0&h=amo6VRUjjAwHCvChzcvE2eGco8z22E_8qMF35cgEMqk=',
-                'county': 'Spain',
+                'country': 'Spain',
                 'city': 'Madrid',
                 'month': 'july'
             }
@@ -24,22 +24,22 @@ const trips = [
     },
     {
         'title': 'Second Trip',
-        'trips': [
+        'places': [
             {
                 'imageUrl': 'https://media.istockphoto.com/photos/portrait-of-young-woman-in-car-looking-at-map-picture-id540529776?k=6&m=540529776&s=612x612&w=0&h=amo6VRUjjAwHCvChzcvE2eGco8z22E_8qMF35cgEMqk=',
-                'county': 'Spain',
+                'country': 'Spain',
                 'city': 'Madrid',
                 'month': 'october'
             },
             {
                 'imageUrl': 'https://media.istockphoto.com/photos/portrait-of-young-woman-in-car-looking-at-map-picture-id540529776?k=6&m=540529776&s=612x612&w=0&h=amo6VRUjjAwHCvChzcvE2eGco8z22E_8qMF35cgEMqk=',
-                'county': 'Spain',
+                'country': 'Spain',
                 'city': 'Valencia',
                 'month': 'november'
             },
             {
                 'imageUrl': 'https://media.istockphoto.com/photos/portrait-of-young-woman-in-car-looking-at-map-picture-id540529776?k=6&m=540529776&s=612x612&w=0&h=amo6VRUjjAwHCvChzcvE2eGco8z22E_8qMF35cgEMqk=',
-                'county': 'Spain',
+                'country': 'Spain',
                 'city': 'Barcelona',
                 'month': 'december'
             }
@@ -47,16 +47,16 @@ const trips = [
     },
     {
         'title': 'Third Trip',
-        'trips': [
+        'places': [
             {
                 'imageUrl': 'https://media.istockphoto.com/photos/portrait-of-young-woman-in-car-looking-at-map-picture-id540529776?k=6&m=540529776&s=612x612&w=0&h=amo6VRUjjAwHCvChzcvE2eGco8z22E_8qMF35cgEMqk=',
-                'county': 'England',
+                'country': 'England',
                 'city': 'London',
                 'month': 'september'
             },
             {
                 'imageUrl': 'https://media.istockphoto.com/photos/portrait-of-young-woman-in-car-looking-at-map-picture-id540529776?k=6&m=540529776&s=612x612&w=0&h=amo6VRUjjAwHCvChzcvE2eGco8z22E_8qMF35cgEMqk=',
-                'county': 'England',
+                'country': 'England',
                 'city': 'Liverpool',
                 'month': 'october'
             }
