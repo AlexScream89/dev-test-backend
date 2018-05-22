@@ -273,6 +273,7 @@ exports.user_activation_account = (req, res, next) => {
 };
 
 exports.get_user_by_id = (req, res, next) => {
+    //Search user by id
     User.findOne({_id: req.params.id})
         .select('_id email firstName lastName')
         .exec()
@@ -280,6 +281,81 @@ exports.get_user_by_id = (req, res, next) => {
             res.status(200).json({
                 data: user
             });
+        })
+        .catch(err => {
+            res.status(500).json({
+                data: null,
+                error: err
+            });
+        });
+};
+
+exports.update_user = (req, res, next) => {
+    //Search user by id
+    User.findOne({_id: req.params.id})
+        .exec()
+        .then(data => {
+            const userData = {
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                email: req.body.email,
+                password: req.body.password
+            };
+
+            if (userData.password !== req.body.repeatPassword) {
+                return res.status(500).json({
+                    data: null,
+                    message: 'Passwords must match'
+                });
+            }
+
+            if (userData.password.trim().length === 0) {
+                delete userData.password;
+                //Update user by id
+                User.update({_id: req.params.id}, {$set: userData})
+                    .select('email firstName lastName')
+                    .exec()
+                    .then(user => {
+                        res.status(200).json({
+                            data: null,
+                            message: 'User updated'
+                        });
+                    })
+                    .catch(err => {
+                        res.status(500).json({
+                            data: null,
+                            error: err
+                        });
+                    });
+            } else {
+                //Bcrypt new password
+                bcrypt.hash(userData.password, 10, (err, hash) => {
+                    if (err) {
+                        return res.status(500).json({
+                            data: null,
+                            error: err
+                        });
+                    } else {
+                        userData.password = hash;
+                        //Update user by id
+                        User.update({_id: req.params.id}, {$set: userData})
+                            .select('email firstName lastName')
+                            .exec()
+                            .then(user => {
+                                res.status(200).json({
+                                    data: null,
+                                    message: 'User updated'
+                                });
+                            })
+                            .catch(err => {
+                                res.status(500).json({
+                                    data: null,
+                                    error: err
+                                });
+                            });
+                    }
+                });
+            }
         })
         .catch(err => {
             res.status(500).json({

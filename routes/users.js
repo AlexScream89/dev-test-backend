@@ -23,5 +23,6 @@ router.post('/registration', UserController.user_registration);
 router.get('/activate-account/:activationHash', UserController.user_activation_account);
 router.post('/forgot-password', UserController.user_forgot_password);
 router.get('/:id', checkAuth, UserController.get_user_by_id);
+router.patch('/:id', checkAuth, UserController.update_user);
 
 module.exports = router;
