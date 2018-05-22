@@ -13,6 +13,7 @@ const nev = require('email-verification')(mongoose);
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const dashboardRouter = require('./routes/dashboard');
+const settingsRouter = require('./routes/settings');
 
 const User = require('./models/user');
 
@@ -56,6 +57,7 @@ app.use((req, res, next) => {
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/dashboard', dashboardRouter);
+app.use('/settings', settingsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
