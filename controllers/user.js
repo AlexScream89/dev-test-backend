@@ -309,9 +309,8 @@ exports.update_user = (req, res, next) => {
                 });
             }
 
-            if (userData.password.trim().length === 0) {
-                delete userData.password;
-                //Update user by id
+            //Update user by id
+            const updateUser = (userData) => {
                 User.update({_id: req.params.id}, {$set: userData})
                     .select('email firstName lastName')
                     .exec()
@@ -327,6 +326,11 @@ exports.update_user = (req, res, next) => {
                             error: err
                         });
                     });
+            };
+
+            if (userData.password.trim().length === 0) {
+                delete userData.password;
+                updateUser(userData);
             } else {
                 //Bcrypt new password
                 bcrypt.hash(userData.password, 10, (err, hash) => {
@@ -337,22 +341,7 @@ exports.update_user = (req, res, next) => {
                         });
                     } else {
                         userData.password = hash;
-                        //Update user by id
-                        User.update({_id: req.params.id}, {$set: userData})
-                            .select('email firstName lastName')
-                            .exec()
-                            .then(user => {
-                                res.status(200).json({
-                                    data: null,
-                                    message: 'User updated'
-                                });
-                            })
-                            .catch(err => {
-                                res.status(500).json({
-                                    data: null,
-                                    error: err
-                                });
-                            });
+                        updateUser(userData);
                     }
                 });
             }
