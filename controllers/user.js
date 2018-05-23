@@ -5,19 +5,7 @@ const generatePassword = require('password-generator');
 const nodemailer = require('nodemailer');
 
 const User = require('../models/user');
-
-const mailConfig = {
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    auth: {
-        user: process.env.email,
-        pass: process.env.emailPassword
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-};
+const HelpersController = require('./helpers');
 
 exports.user_login = (req, res, next) => {
     //Search user by email
@@ -25,26 +13,17 @@ exports.user_login = (req, res, next) => {
         .exec()
         .then(user => {
             if (user.length < 1) {
-                return res.status(401).json({
-                    data: null,
-                    message: 'Auth failed'
-                });
+                return HelpersController.authErrorResponse(res, 'Auth failed');
             }
 
             //Comparing passwords
             bcrypt.compare(req.body.password, user.password, (err, data) =>  {
                 if (err) {
-                    return res.status(401).json({
-                        data: null,
-                        message: 'Auth failed'
-                    });
+                    return HelpersController.authErrorResponse(res, 'Auth failed');
                 }
 
                 if (!user.active) {
-                    return res.status(401).json({
-                        data: null,
-                        message: 'Your account not activated'
-                    })
+                    return HelpersController.authErrorResponse(res, 'Your account not activate');
                 }
 
                 if (data) {
@@ -73,18 +52,10 @@ exports.user_login = (req, res, next) => {
                         token: token
                     })
                 }
-                res.status(401).json({
-                    data: null,
-                    message: 'Auth failed'
-                });
+                return HelpersController.authErrorResponse(res, 'Auth failed');
             });
         })
-        .catch(err => {
-            res.status(500).json({
-                data: null,
-                error: err
-            });
-        });
+        .catch(err => HelpersController.errorResponse(res, err));
 };
 
 exports.user_login_facebook = (req, res, next) => {
@@ -110,11 +81,10 @@ exports.user_registration = (req, res, next) => {
                     message: 'Email exists'
                 });
             } else {
-                if (req.body.password !== req.body.repeatPassword) {
-                    return res.status(500).json({
-                        data: null,
-                        message: 'Passwords must match'
-                    });
+                //Match passwords
+                const matchPSW = HelpersController.matchPasswords(res, req.body.password, req.body.repeatPassword);
+                if (!matchPSW) {
+                    return;
                 }
 
                 //Bcrypt password
@@ -145,7 +115,7 @@ exports.user_registration = (req, res, next) => {
 
                                 //Send activation email
                                 nodemailer.createTestAccount((err, account) => {
-                                    let transporter = nodemailer.createTransport(mailConfig);
+                                    let transporter = nodemailer.createTransport(HelpersController.mailConfig);
 
                                     let mailOptions = {
                                         from: '"Dev Test" <dev-test@admin.com>',
@@ -165,16 +135,12 @@ exports.user_registration = (req, res, next) => {
                                     message: 'Please check your email for account activation'
                                 });
                             })
-                            .catch(err => {
-                                res.status(500).json({
-                                    data: null,
-                                    error: err
-                                });
-                            });
+                            .catch(err => HelpersController.errorResponse(res, err));
                     }
                 });
             }
-        });
+        })
+        .catch(err => HelpersController.errorResponse(res, err));
 };
 
 exports.user_forgot_password = (req, res, next) => {
@@ -194,7 +160,7 @@ exports.user_forgot_password = (req, res, next) => {
 
             //Send email
             nodemailer.createTestAccount((err, account) => {
-                let transporter = nodemailer.createTransport(mailConfig);
+                let transporter = nodemailer.createTransport(HelpersController.mailConfig);
 
                 let mailOptions = {
                     from: '"Dev Test" <dev-test@admin.com>',
@@ -225,24 +191,14 @@ exports.user_forgot_password = (req, res, next) => {
                                         message: 'Please check you email'
                                     });
                                 })
-                                .catch(err => {
-                                    res.status(500).json({
-                                        data: null,
-                                        error: err
-                                    });
-                                });
+                                .catch(err => HelpersController.errorResponse(res, err));
                         }
                     });
 
                 });
             });
         })
-        .catch(err => {
-            res.status(500).json({
-                data: null,
-                error: err
-            });
-        });
+        .catch(err => HelpersController.errorResponse(res, err));
 };
 
 exports.user_activation_account = (req, res, next) => {
@@ -282,12 +238,7 @@ exports.get_user_by_id = (req, res, next) => {
                 data: user
             });
         })
-        .catch(err => {
-            res.status(500).json({
-                data: null,
-                error: err
-            });
-        });
+        .catch(err => HelpersController.errorResponse(res, err));
 };
 
 exports.update_user = (req, res, next) => {
@@ -301,12 +252,10 @@ exports.update_user = (req, res, next) => {
                 email: req.body.email,
                 password: req.body.password
             };
-
-            if (userData.password !== req.body.repeatPassword) {
-                return res.status(500).json({
-                    data: null,
-                    message: 'Passwords must match'
-                });
+            //Match passwords
+            const matchPSW = HelpersController.matchPasswords(res, userData.password, req.body.repeatPassword);
+            if (!matchPSW) {
+                return;
             }
 
             //Update user by id
@@ -320,12 +269,7 @@ exports.update_user = (req, res, next) => {
                             message: 'User updated'
                         });
                     })
-                    .catch(err => {
-                        res.status(500).json({
-                            data: null,
-                            error: err
-                        });
-                    });
+                    .catch(err => HelpersController.errorResponse(res, err));
             };
 
             if (userData.password.trim().length === 0) {
@@ -346,10 +290,5 @@ exports.update_user = (req, res, next) => {
                 });
             }
         })
-        .catch(err => {
-            res.status(500).json({
-                data: null,
-                error: err
-            });
-        });
+        .catch(err => HelpersController.errorResponse(res, err));
 };

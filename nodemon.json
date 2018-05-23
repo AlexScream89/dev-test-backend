@@ -2,6 +2,7 @@
   "env": {
     "JWT_KEY": "secret-key",
     "email": "YOUR EMAIL",
-    "emailPassword": "YOUR PASSWORD"
+    "emailPassword": "YOUR PASSWORD",
+    "emailHost": "smtp.gmail.com"
   }
 }
