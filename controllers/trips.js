@@ -48,3 +48,15 @@ exports.trips_create = (req, res, next) => {
         })
         .catch(err => HelpersController.errorResponse(res, err));
 };
+
+exports.get_trip_by_id = (req, res, next) => {
+    Trip.findOne({_id: req.params.id})
+        .populate('places')
+        .exec()
+        .then(data => {
+            res.status(200).json({
+                data: data
+            });
+        })
+        .catch(err => HelpersController.errorResponse(res, err));
+};

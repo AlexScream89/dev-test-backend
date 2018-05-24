@@ -6,5 +6,6 @@ const checkAuth = require('../middleware/check-auth');
 
 router.get('', checkAuth, TripsController.get_trips);
 router.post('', checkAuth, TripsController.trips_create);
+router.get('/:id', checkAuth, TripsController.get_trip_by_id);
 
 module.exports = router;
