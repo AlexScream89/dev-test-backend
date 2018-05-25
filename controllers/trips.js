@@ -60,3 +60,11 @@ exports.get_trip_by_id = (req, res, next) => {
         })
         .catch(err => HelpersController.errorResponse(res, err));
 };
+
+exports.upload_image = (req, res, next) => {
+    const host = req.headers.host;
+    const filePath = req.file.path;
+    res.status(200).json({
+        data: `${host}/${filePath}`
+    });
+};
