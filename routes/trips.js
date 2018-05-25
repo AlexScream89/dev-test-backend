@@ -5,6 +5,7 @@ const router = express.Router();
 const TripsController = require('../controllers/trips');
 const checkAuth = require('../middleware/check-auth');
 
+//Save file to directory
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
         cb(null, './public/images');
@@ -14,6 +15,7 @@ const storage = multer.diskStorage({
     }
 });
 
+//File filter
 const fileFilter = (req, file, cb) => {
     if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
         cb(null, true);
@@ -22,6 +24,7 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
+//Upload file
 const upload = multer({
     storage: storage,
     limits: {
