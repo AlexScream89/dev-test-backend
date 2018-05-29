@@ -9,7 +9,7 @@ const imgUrl = 'https://media.istockphoto.com/photos/portrait-of-young-woman-in-
 
 exports.get_trips = async (req, res, next) => {
     try {
-        const trip = await Trip.find().populate('places').exec();
+        const trip = await Trip.find().exec();
         res.status(200).json({
             data: trip
         });
@@ -37,7 +37,7 @@ exports.trips_create = async (req, res, next) => {
 
 exports.get_trip_by_id = async (req, res, next) => {
     try {
-        const trip = await Trip.findOne({_id: req.params.id}).populate('places').exec();
+        const trip = await Trip.findOne({_id: req.params.id}).exec();
         res.status(200).json({
             data: trip
         });
@@ -50,6 +50,6 @@ exports.upload_image = (req, res, next) => {
     const host = req.headers.host;
     const filePath = req.file.path;
     res.status(200).json({
-        data: `${host}/${filePath}`
+        data: `${filePath}`
     });
 };

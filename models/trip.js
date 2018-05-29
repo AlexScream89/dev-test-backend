@@ -8,7 +8,7 @@ const tripSchema = mongoose.Schema({
     },
     places: [{
         imageUrl: {
-            type: String
+            type: [String]
         },
         country: {
             type: String,
