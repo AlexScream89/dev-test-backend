@@ -7,8 +7,25 @@ const tripSchema = mongoose.Schema({
         required: true
     },
     places: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Place'
+        imageUrl: {
+            type: String
+        },
+        country: {
+            type: String,
+            required: true
+        },
+        city: {
+            type: String,
+            required: true
+        },
+        beginAt: {
+            type: Date,
+            required: true
+        },
+        endAt: {
+            type: Date,
+            required: true
+        }
     }]
 });
 
