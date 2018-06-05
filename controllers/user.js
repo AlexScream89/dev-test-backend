@@ -99,10 +99,17 @@ exports.user_registration = async (req, res, next) => {
             lastName: req.body.lastName,
             activationHash: activationHash
         });
+
+        //Save user to DB
         const userCreated = await userModel.save();
 
+        res.status(200).json({
+            message: 'Please check your email for account activation'
+        });
+
         //Create activation link for email
-        const activationLink = `http://localhost:3000/users/activate-account/${activationHash}`;
+        const host = req.headers.host;
+        const activationLink = `${host}/users/activate-account/${activationHash}`;
 
         //Send activation email
         const crateTestAccount = await nodemailer.createTestAccount();
@@ -114,10 +121,6 @@ exports.user_registration = async (req, res, next) => {
             html: `For account activation you need click this link - <a href='${activationLink}'>${activationLink}</a>`
         };
         const sendMail = await transporter.sendMail(mailOptions);
-
-        res.status(200).json({
-            message: 'Please check your email for account activation'
-        });
     } catch (err) {
         HelpersController.errorResponse(res, err);
     }
