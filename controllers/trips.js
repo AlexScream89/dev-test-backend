@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const mockTrips = require('../mock/trips');
 
-const HelpersController = require('./helpers');
+const ErrorController = require('./error');
 const Trip = require('../models/trip');
 const Place = require('../models/place');
 
@@ -14,7 +14,7 @@ exports.get_trips = async (req, res, next) => {
             data: trip
         });
     } catch (err) {
-        HelpersController.errorResponse(res, err)
+        ErrorController.errorResponse(res, err)
     }
 };
 
@@ -31,7 +31,7 @@ exports.trips_create = async (req, res, next) => {
             data: savedTrip
         });
     } catch (err) {
-        HelpersController.errorResponse(res, err);
+        ErrorController.errorResponse(res, err);
     }
 };
 
@@ -42,7 +42,7 @@ exports.get_trip_by_id = async (req, res, next) => {
             data: trip
         });
     } catch (err) {
-        HelpersController.errorResponse(res, err);
+        ErrorController.errorResponse(res, err);
     }
 };
 

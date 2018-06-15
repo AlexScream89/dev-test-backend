@@ -5,7 +5,9 @@ const generatePassword = require('password-generator');
 const nodemailer = require('nodemailer');
 
 const User = require('../models/user');
-const HelpersController = require('./helpers');
+const ErrorController = require('./error');
+const EmailController = require('./email');
+const ValidationController = require('./validation');
 
 exports.user_login = async (req, res, next) => {
     try {
@@ -13,18 +15,18 @@ exports.user_login = async (req, res, next) => {
         const user = await User.findOne({email: req.body.email}).exec();
 
         if (user.length < 1) {
-            return HelpersController.authErrorResponse(res, 'Auth failed');
+            return ErrorController.authErrorResponse(res, 'Auth failed');
         }
 
         if (!user.active) {
-            return HelpersController.authErrorResponse(res, 'Your account not activate');
+            return ErrorController.authErrorResponse(res, 'Your account not activate');
         }
 
         //Comparing passwords
         const comparePasswords = await bcrypt.compare(req.body.password, user.password);
 
         if (!comparePasswords) {
-            return HelpersController.authErrorResponse(res, 'Auth failed');
+            return ErrorController.authErrorResponse(res, 'Auth failed');
         }
 
         //Create token
@@ -52,7 +54,7 @@ exports.user_login = async (req, res, next) => {
             token: token
         });
     } catch (err) {
-        return HelpersController.authErrorResponse(res, 'Auth failed');
+        return ErrorController.authErrorResponse(res, 'Auth failed');
     }
 };
 
@@ -70,6 +72,9 @@ exports.user_login_google = (req, res, next) => {
 
 exports.user_registration = async (req, res, next) => {
     try {
+        //Email validation
+        ValidationController.emailValidation(res, req.body.email);
+
         //Search user by email
         const user = await User.find({email: req.body.email}).exec();
         if (user.length >= 1) {
@@ -79,7 +84,7 @@ exports.user_registration = async (req, res, next) => {
             });
         }
         //Match passwords
-        const matchPSW = HelpersController.matchPasswords(res, req.body.password, req.body.repeatPassword);
+        const matchPSW = ValidationController.matchPasswords(res, req.body.password, req.body.repeatPassword);
         if (!matchPSW) {
             return;
         }
@@ -113,7 +118,7 @@ exports.user_registration = async (req, res, next) => {
 
         //Send activation email
         const crateTestAccount = await nodemailer.createTestAccount();
-        const transporter = nodemailer.createTransport(HelpersController.mailConfig);
+        const transporter = nodemailer.createTransport(EmailController.mailConfig);
         const mailOptions = {
             from: '"Dev Test" <dev-test@admin.com>',
             to: req.body.email,
@@ -122,7 +127,7 @@ exports.user_registration = async (req, res, next) => {
         };
         const sendMail = await transporter.sendMail(mailOptions);
     } catch (err) {
-        HelpersController.errorResponse(res, err);
+        ErrorController.errorResponse(res, err);
     }
 };
 
@@ -142,7 +147,7 @@ exports.user_forgot_password = async (req, res, next) => {
 
         //Send email
         const createTestAccount = await nodemailer.createTestAccount();
-        const transporter = nodemailer.createTransport(HelpersController.mailConfig);
+        const transporter = nodemailer.createTransport(EmailController.mailConfig);
 
         const mailOptions = {
             from: '"Dev Test" <dev-test@admin.com>',
@@ -164,7 +169,7 @@ exports.user_forgot_password = async (req, res, next) => {
         });
 
     } catch (err) {
-        HelpersController.errorResponse(res, err);
+        ErrorController.errorResponse(res, err);
     }
 };
 
@@ -196,7 +201,7 @@ exports.get_user_by_id = async (req, res, next) => {
             data: user
         });
     } catch (err) {
-        HelpersController.errorResponse(res, err);
+        ErrorController.errorResponse(res, err);
     }
 };
 
@@ -221,7 +226,7 @@ exports.update_user = async (req, res, next) => {
         };
 
         //Match passwords
-        const matchPSW = HelpersController.matchPasswords(res, userData.password, req.body.repeatPassword);
+        const matchPSW = ValidationController.matchPasswords(res, userData.password, req.body.repeatPassword);
         if (!matchPSW) {
             return;
         }
@@ -236,6 +241,6 @@ exports.update_user = async (req, res, next) => {
             updateUser(userData);
         }
     } catch (err) {
-        HelpersController.errorResponse(res, err);
+        ErrorController.errorResponse(res, err);
     }
 };
