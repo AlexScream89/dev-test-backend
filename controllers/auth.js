@@ -9,6 +9,8 @@ const ErrorController = require('./error');
 const EmailController = require('./email');
 const ValidationController = require('./validation');
 
+const adminEmail = 'dev-test@admin.com';
+
 exports.user_login = async (req, res, next) => {
     try {
         //Search user by email
@@ -108,7 +110,7 @@ exports.user_registration = async (req, res, next) => {
         const crateTestAccount = await nodemailer.createTestAccount();
         const transporter = nodemailer.createTransport(EmailController.mailConfig);
         const mailOptions = {
-            from: '"Dev Test" <dev-test@admin.com>',
+            from: `"Dev Test" <${adminEmail}>`,
             to: req.body.email,
             subject: 'Account activation',
             html: `For account activation you need click this link - <a href='${activationLink}'>${activationLink}</a>`
@@ -138,7 +140,7 @@ exports.user_forgot_password = async (req, res, next) => {
         const transporter = nodemailer.createTransport(EmailController.mailConfig);
 
         const mailOptions = {
-            from: '"Dev Test" <dev-test@admin.com>',
+            from: `"Dev Test" <${adminEmail}>`,
             to: req.body.email,
             subject: 'Reset password',
             text: `Your new password is ${newPassword}`
