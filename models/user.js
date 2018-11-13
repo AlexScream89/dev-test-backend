@@ -24,7 +24,22 @@ const userSchema = mongoose.Schema({
     },
     activationHash: {
         type: String
+    },
+    createdAt: {
+        type: Date
+    },
+    updatedAt: {
+        type: Date
     }
+});
+
+userSchema.pre('save', (next) => {
+    this.createdAt = new Date();
+    next();
+});
+
+userSchema.pre('update', () => {
+    this.update({}, {$set: {updatedAt: new Date()}});
 });
 
 module.exports = mongoose.model('User', userSchema);

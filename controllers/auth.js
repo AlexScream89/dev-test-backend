@@ -96,7 +96,7 @@ exports.user_registration = async (req, res, next) => {
         });
 
         //Save user to DB
-        const userCreated = await userModel.save();
+        await userModel.save();
 
         res.status(200).json({
             message: 'Please check your email for account activation'
@@ -107,7 +107,7 @@ exports.user_registration = async (req, res, next) => {
         const activationLink = `${host}/users/activate-account/${activationHash}`;
 
         //Send activation email
-        const crateTestAccount = await nodemailer.createTestAccount();
+        await nodemailer.createTestAccount();
         const transporter = nodemailer.createTransport(EmailController.mailConfig);
         const mailOptions = {
             from: `"Dev Test" <${adminEmail}>`,
@@ -115,7 +115,7 @@ exports.user_registration = async (req, res, next) => {
             subject: 'Account activation',
             html: `For account activation you need click this link - <a href='${activationLink}'>${activationLink}</a>`
         };
-        const sendMail = await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
     } catch (err) {
         ErrorController.errorResponse(res, err);
     }
@@ -136,7 +136,7 @@ exports.user_forgot_password = async (req, res, next) => {
         const newPassword = generatePassword(10, false);
 
         //Send email
-        const createTestAccount = await nodemailer.createTestAccount();
+        await nodemailer.createTestAccount();
         const transporter = nodemailer.createTransport(EmailController.mailConfig);
 
         const mailOptions = {
@@ -146,7 +146,7 @@ exports.user_forgot_password = async (req, res, next) => {
             text: `Your new password is ${newPassword}`
         };
 
-        const sendMail = await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
 
         //Bcrypt new password
         const hash = await bcrypt.hash(newPassword, 10);
@@ -176,7 +176,7 @@ exports.user_activation_account = async (req, res, next) => {
         };
 
         //Activation user account
-        const updatedUser = await User.update({_id: user._id}, {$set: updateObj}).exec();
+        await User.update({_id: user._id}, {$set: updateObj}).exec();
         res.render('layout', { body: 'Your account activation' });
     } catch (err) {
         res.render('error', { message: 'Invalid activation link' });

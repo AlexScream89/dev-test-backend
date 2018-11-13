@@ -20,7 +20,7 @@ exports.update_user = async (req, res, next) => {
     try {
         //Update user by id function
         const updateUser = async (userData) => {
-            const updatedUser = await User.update({_id: req.params.id}, {$set: userData}).select('email firstName lastName').exec();
+            await User.update({_id: req.params.id}, {$set: userData}).select('email firstName lastName').exec();
             res.status(200).json({
                 data: null,
                 message: 'User updated'
@@ -28,7 +28,7 @@ exports.update_user = async (req, res, next) => {
         };
 
         //Search user by id
-        const user = await User.findOne({_id: req.params.id}).exec();
+        await User.findOne({_id: req.params.id}).exec();
         const userData = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
